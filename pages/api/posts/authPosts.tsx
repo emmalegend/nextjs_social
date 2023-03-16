@@ -10,34 +10,27 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method === "POST") {
+  if (req.method === "GET") {
     const session = await getServerSession(req, res, authOptions);
     if (!session)
       return res.status(401).json({ message: "Please sign in to make a Post" });
 
-    const { title } = req.body;
-    console.log(title);
-    //Get User
-    const primsaUser = await client.user.findUnique({
-      where: { email: session?.user?.email || "" },
-    });
-    //add check
-    if (title.length > 300) {
-      return res.status(403).json({ message: "Please write a shorter post" });
-    }
-    if (!title.length) {
-      return res
-        .status(403)
-        .json({ message: "Please do not leave this empty" });
-    }
+    //Get AUTH users post
     try {
-      const result = await client.post.create({
-        data: {
-          title,
-          userId: primsaUser.id,
+      const data = await client.user.findUnique({
+        where: { email: session.user?.email || "" },
+        include: {
+          post: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            include: {
+              Comment: true,
+            },
+          },
         },
       });
-      res.status(200).json(result);
+      res.status(200).json(data);
     } catch (error) {
       res
         .status(403)
