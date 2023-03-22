@@ -1,7 +1,7 @@
-import client from "../../../prisma/client";
+import { NextApiResponse, NextApiRequest } from "next";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
-import { NextApiResponse, NextApiRequest } from "next";
+import client from "../../../prisma/client";
 
 export default async function handler(
   req: NextApiRequest,
@@ -13,13 +13,12 @@ export default async function handler(
       .status(401)
       .json({ message: "Please signin to post a comment." });
   }
-  //Get User
-  const prismaUser = await client.user.findUnique({
-    where: { email: session?.user?.email || "" },
-  });
   if (req.method === "POST") {
     const { title, postId } = req.body.data;
-    console.log(title, postId);
+    //Get User
+    const prismaUser = await client.user.findUnique({
+      where: { email: session?.user?.email || "" },
+    });
     if (!title.length) {
       return res.status(401).json({ message: "Please enter some text" });
     }

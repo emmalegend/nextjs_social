@@ -18,7 +18,6 @@ export default function Home() {
   if (isLoading) return "Loading....";
   return (
     <main>
-      <h1>Hello Next</h1>
       <AddPost />
       {data?.map((post, id) => (
         <Post

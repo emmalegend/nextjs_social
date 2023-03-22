@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
@@ -14,35 +13,34 @@ type PostProps = {
   id?: string;
 };
 export default function AddComment({ id }: PostProps) {
-  console.log(id);
   const [title, setTitle] = useState("");
   const [isDisabled, setIsDisabled] = useState(false);
 
   const queryClient = useQueryClient();
   const { mutate } = useMutation(
-    async (data: Comment) => {
-      return axios.post("/api/posts/addComment", { data });
-    },
+    async (data: Comment) =>
+      await axios.post("/api/posts/addComments", { data }),
     {
+      onError: (error) => {
+        if (error instanceof AxiosError) {
+          toast.error(error?.response?.data.message);
+        }
+        console.log(error);
+        setIsDisabled(false);
+        setTitle("");
+      },
       onSuccess: (data) => {
         queryClient.invalidateQueries(["detail-post"]);
         setTitle("");
         setIsDisabled(false);
         toast.success("Added your comment");
       },
-      onError: (error) => {
-        console.log(error);
-        setIsDisabled(false);
-        setTitle("");
-        if (error instanceof AxiosError) {
-          toast.error(error?.response?.data.message);
-        }
-      },
     }
   );
 
   const submitComment = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log({ title, postId: id });
     setIsDisabled(true);
     mutate({ title, postId: id });
   };

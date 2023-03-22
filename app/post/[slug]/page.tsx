@@ -26,7 +26,6 @@ export default function PostDetail(url: URL) {
     queryFn: () => fetchDetails(url.params.slug),
   });
   if (isLoading) return "Loading";
-  console.log(data);
   return (
     <div>
       <Post
